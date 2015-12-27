@@ -12,7 +12,7 @@ from edc_sqlite import SQliteEdit
 from edc_init import LicenceCheck
 from edc_read_input import ReadInput
 
-import EDC_write_output
+from edc_write_output import Write_output_PnVa_Units_paternA, Write_output_CEGLY_paternA
 import edc_profile_manager
 
 __author__ = 'Marcin Pieczyński'
@@ -76,11 +76,9 @@ class InformacjaTop(object):
 
 
 class MainGui(LicenceCheck, SQliteEdit):
-    """
-    Class containing main gui of the program and all methods connected with the gui.
-    """
-    def __init__(self):
+    """Class containing main gui of the program and all methods connected with the gui."""
 
+    def __init__(self):
         LicenceCheck.__init__(self)
         SQliteEdit.__init__(self)
 
@@ -132,8 +130,8 @@ class MainGui(LicenceCheck, SQliteEdit):
             save = tkFileDialog.asksaveasfilename(parent=self.top, initialdir="/home/marcin/pulpit/",
                                                   title="Wybór pliku do zapisu danych PnVa",
                                                   filetypes=[("Excel file", ".xlsx")])
-            self.filepath_PnVa.set((os.path.realpath(save))+".xlsx")
-            self.PnVa_file = os.path.realpath(save)+".xlsx"
+            self.filepath_PnVa.set((os.path.realpath(save)))
+            self.PnVa_file = os.path.realpath(save)
             self.PvNanumber += 1
         except ValueError:
             tkMessageBox.showerror("Error", " Wystąpił problem z plikiem do zapisu danych PnVa.")
@@ -144,8 +142,8 @@ class MainGui(LicenceCheck, SQliteEdit):
             save = tkFileDialog.asksaveasfilename(parent=self.top, initialdir="/home/marcin/pulpit/",
                                                   title="Wybór pliku do zapisu danych UNITS",
                                                   filetypes = [("Excel file", ".xlsx")])
-            self.filepath_UNITS.set((os.path.realpath(save))+".xlsx")
-            self.UNITS_file = os.path.realpath(save)+".xlsx"
+            self.filepath_UNITS.set((os.path.realpath(save)))
+            self.UNITS_file = os.path.realpath(save)
             self.UNITSnumber += 1
         except ValueError:
             tkMessageBox.showerror("Error", " Wystąpił problem z plikiem do zapisu danych UNITS.")
@@ -157,8 +155,8 @@ class MainGui(LicenceCheck, SQliteEdit):
                                                   title="Wybór pliku do zapisu danych z Cegieł",
                                                   filetypes=[("Excel file", ".xlsx")])
             # fc = open(save,"w")
-            self.filepath_CEGLY.set((os.path.realpath(save))+".xlsx")
-            self.CEGLY_file = os.path.realpath(save)+".xlsx"
+            self.filepath_CEGLY.set((os.path.realpath(save)))
+            self.CEGLY_file = os.path.realpath(save)
             self.Ceglynumber += 1
         except ValueError:
             tkMessageBox.showerror("Error", " Wystąpił problem z plikiem do zapisu danych z Cegieł.")
@@ -203,31 +201,68 @@ class MainGui(LicenceCheck, SQliteEdit):
 
     # Reading of input data for excel file.
 
-            self.start_progres_bar()                             ;self.ad_step_to_progres_bar(5)
+            self.start_progres_bar()
 
-            excel_input_file = ReadInput(self.excel_input_file)  ;self.ad_step_to_progres_bar(5)
-            excel_input_file.open_input_file()                   ;self.ad_step_to_progres_bar(5)
-            excel_input_file.get_date()                          ;self.ad_step_to_progres_bar(5)
-            excel_input_file.get_PnVa_Units_column()             ;self.ad_step_to_progres_bar(5)
-            excel_input_file.get_cegla_positions()               ;self.ad_step_to_progres_bar(5)
-            excel_input_file.get_Cegly_data()                    ;self.ad_step_to_progres_bar(5)
+            excel_input_file = ReadInput()                          ;self.ad_step_to_progres_bar(5)
+            excel_input_file.open_input_file(self.excel_input_file) ;self.ad_step_to_progres_bar(5)
+            excel_input_file.get_date()                             ;self.ad_step_to_progres_bar(5)
+            excel_input_file.get_PnVa_Units_column()                ;self.ad_step_to_progres_bar(5)
+            excel_input_file.get_cegla_positions()                  ;self.ad_step_to_progres_bar(5)
+            excel_input_file.get_Cegly_data(self.com_choosen_profile.get())
+            self.ad_step_to_progres_bar(5)
             excel_input_file.get_PnVa_UNITS_data(self.com_choosen_profile.get())
             self.ad_step_to_progres_bar(5)
-
             print "Odczytanie danych z pliku input OK"
 
+            # print "excel_input_file.PnVa_data", excel_input_file.PnVa_data
+            # print 50 * "%%%"
+            # print "excel_input_file.UNITS_data", excel_input_file.UNITS_data
+            print 50 * "%%%"
+            print "excel_input_file.CEGLY_data", excel_input_file.CEGLY_data
+            print 50 * "%%%"
+            # print "excel_input_file.output_zakladki", excel_input_file.output_zakladki
+            # print "excel_input_file.output_lista_cegiel", excel_input_file.output_lista_cegiel
+            # print "excel_input_file.output_leki", excel_input_file.output_leki
 
 
+            print "START zapis danych PnVa do pliku output"
+            output1 = Write_output_PnVa_Units_paternA(excel_input_file.output_zakladki,
+                                                      excel_input_file.PnVa_data)
+            output1.start_output()
+            output1.write_base_data(excel_input_file.output_lista_cegiel,
+                                    excel_input_file.output_leki,
+                                    excel_input_file.daty)
+            output1.write_PnVa_UNITS_data()
+            output1.save_output(self.PnVa_file)
+            print "Zapisywanie danych Zakończone OK"
 
+            print "START zapis danych UNITS do pliku output"
+            output2 = Write_output_PnVa_Units_paternA(excel_input_file.output_zakladki,
+                                                      excel_input_file.UNITS_data)
+            output2.start_output()
+            output2.write_base_data(excel_input_file.output_lista_cegiel,
+                                    excel_input_file.output_leki,
+                                    excel_input_file.daty)
+            output2.write_PnVa_UNITS_data()
+            output2.save_output(self.UNITS_file)
+            print "Zapisywanie danych Zakończone OK"
 
-            # get_data()                                             ;ad_step(15)
-            # start_input(excel_input_file)                          ;ad_step(10)
-            # # date_finding()                                         ;ad_step(10)
-            # KRKA_excel_data_converter(PnVa_file, "Pn Va")          ;ad_step(20)
-            # KRKA_excel_data_converter(UNITS_file, "UNITS REPORT")  ;ad_step(20)
-            # KRKA_data_converter_cegly(CEGLY_file)                  ;ad_step(20)
+            print "START zapis danych CEGLY do pliku output"
 
-            ##################################################################
+            output3 = Write_output_CEGLY_paternA()
+            output3.start_output(excel_input_file.output_lista_cegiel)
+            output3.write_base_data(excel_input_file.output_lista_cegiel,
+                                    excel_input_file.output_leki_cegly,
+                                    excel_input_file.daty)
+            print 40 * "%"
+            print "excel_input_file.CEGLY_data", excel_input_file.CEGLY_data
+
+            output3.write_PnVa_UNITS_data(excel_input_file.output_lista_cegiel,
+                                          excel_input_file. output_leki_cegly,
+                                          excel_input_file.CEGLY_data)
+            output3.save_output(self.CEGLY_file)
+            print "Zapisywanie danych Zakończone OK"
+
 
             return self.work_finished()
 
@@ -321,8 +356,6 @@ class MainGui(LicenceCheck, SQliteEdit):
             self.top.grid_columnconfigure(x,weight=1)
 
         return self.progres, self.com_choosen_profile
-
-
 
 if __name__ == '__main__':
 
