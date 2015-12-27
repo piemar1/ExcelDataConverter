@@ -1,17 +1,14 @@
 # ! /usr/bin/env python
 # -*- coding: utf-8 -*-
-__author__ = 'Marcin Pieczyński'
-
 
 import openpyxl
 from edc_sqlite import SQliteEdit
 import time
 
-input_file_path1 = "/home/marcin/Pulpit/ExcelDataConverter_2.1/Raporty 3V2015/A DYMOW SZEMBEK SZYMEL Konkurencja Rx 2015_1Q.xlsx"
-input_file_path2 = "/home/marcin/Pulpit/ExcelDataConverter_2.1/Raporty 3V2015/A4 Konkurencja Rx 2014_4Q.xlsx"
+__author__ = 'Marcin Pieczyński'
 
 
-class Read_input(SQliteEdit):
+class ReadInput(SQliteEdit):
     """Klasa zawierająca metody czytania danych z pliku excel input"""
 
     def __init__(self, input_file_path):
@@ -31,19 +28,19 @@ class Read_input(SQliteEdit):
         self.cegly = []               # lista z nazwami cegieł z pliku input excel
         self.cegly_position = {}      # położenie danych dla poszczególnych cegieł w zakłądkach input
 
-        self.open_input_file()
-        self.get_date()
-        self.get_PnVa_Units_column()
-        self.get_cegla_positions()
-
         # najważniejsze  - dane dla poszczególnych leków
         self.PnVa_data = {}           # dane PnVa dla wybranych leków i cegieł
         self.UNITS_data = {}          # dane UNITS dla wybranych leków i cegieł
         self.CEGLY_data = {}          # dane PnVa oraz UNITS dla wybranych leków i cegieł
 
+        # self.open_input_file()        # otwarcie pliku input z danymi
+        # self.get_date()               # odczytanie daty z pliku input z danymi
+        # self.get_PnVa_Units_column()  # znalezienie kolumn zawierających dane PnVa oraz UNITS
+        # self.get_cegla_positions()    # zbiera lokalizacje danych dla poszczególnych cegieł w zakładkach
+
         # self.cegly_position = {sheet_name:{"cegla1":[10,20], "cegla2":[20,30],...kolejne cegły..},
         #                        sheet_name:{"cegla1":[10,20], "cegla2":[20,30],...kolejne cegły..},
-        #                       ...kolejnr shhety...}
+        #                       ...kolejne shhety...}
 
         # self.PnVa_data = {nazwa grupy leków1: {lek1: {cegła1: wartość, cegła2: wartość, cegła3: wartość,
         #                                              cegła4: wartość, cegła5: wartość, cegła5: wartość,}
@@ -66,9 +63,10 @@ class Read_input(SQliteEdit):
 
     def get_date(self):
         """ Metoda odnajduje w pliku intup informacje o dacie zawartych danych. """
-        for sheet_name in list(self.wb_sheets):
+        for sheet_name in self.wb_sheets:
             zakladka = self.wb.get_sheet_by_name(sheet_name)
             size = zakladka.calculate_dimension() # zwraca wielkość zakładki w postaci strinha --> A1:T60
+
             for row in zakladka.iter_rows(size):
                 for cell in row:
                     if "MNTH" in str(cell.value):
@@ -80,9 +78,10 @@ class Read_input(SQliteEdit):
 
     def get_PnVa_Units_column(self):
         """ Metoda odnajduje kolumnmy zawierające dane PnVa oraz UNITS. """
-        for sheet_name in list(self.wb_sheets):
+        for sheet_name in self.wb_sheets:
             zakladka = self.wb.get_sheet_by_name(sheet_name)
             size = zakladka.calculate_dimension() # zwraca wielkość zakładki w postaci strinha --> A1:T60
+
             for row in zakladka.iter_rows(size):
                 for cell in row:
                     if "Pn Va" in str(cell.value):
@@ -91,26 +90,24 @@ class Read_input(SQliteEdit):
                         self.UNITS = cell.column
                     if self.PnVa and self.UNITS:
                         break
-        # print ("PnVa", self.PnVa)
-        # print ("Units", self.UNITS)
 
     def get_cegla_positions(self):
         """ Metoda znajduje i zbiera informacje na temat cegieł zawartym w pliku excel input"""
 
-        for sheet_name in list(self.wb_sheets):
+        for sheet_name in self.wb_sheets:
             zakladka = self.wb.get_sheet_by_name(sheet_name)
             no_of_row = zakladka.get_highest_row()              # zwraca liczbę row
+
             for r in range(no_of_row):                          # iteracja po row
                 wart = zakladka["A" + str(r+1)].value
-                if wart and len(wart)<= 13:
-                    # BARDZO NEWRALGICZNE miejsce liczba 13 - uzależniona od liczby spacji przy nazwach cegieł
-                    # w pliku excel !!!!!!!!!!!!
-                    if wart.strip() not in self.cegly:
-                        self.cegly.append(wart.strip())
+                if wart and wart.strip() not in self.cegly:                  # ZASTOSOWAĆ RE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    self.cegly.append(wart.strip())
 
-        for sheet_name in list(self.wb_sheets):
+        for sheet_name in self.wb_sheets:
             positions = []
-            self.cegly_position[sheet_name] = {str(k): [None, None] for k in self.cegly}
+
+            self.cegly_position[sheet_name] = {str(k): [None, None] for k in self.cegly}  # tworzenie elementów słownika
+
             zakladka = self.wb.get_sheet_by_name(sheet_name)
             no_of_row = zakladka.get_highest_row()                  # zwraca liczbę row
 
@@ -120,18 +117,17 @@ class Read_input(SQliteEdit):
                     if wart and wart.strip() == cegla:
                         positions.append(r+1)
 
-            # print  "positions", positions
             for x in range(len(self.cegly)-1):              # zapisywanie w słowniku informacji o położeniu cegieł
                 self.cegly_position[sheet_name][self.cegly[x]][0] = positions[x]
                 self.cegly_position[sheet_name][self.cegly[x]][1] = positions[x+1]-1
 
             self.cegly_position[sheet_name][self.cegly[-1]][0] = positions[-1]
             self.cegly_position[sheet_name][self.cegly[-1]][1] = int(no_of_row)    # To miejsce można zooptymalizować
+
             # int(no_of_row) często wykracza znacząco poza rzeczywistą wielkość tabeli
 
     def get_Cegly_data(self):
         """ Metoda wypełnia danymi z pliku input słownik dla danych PnVa oraz UNITS dla cegiel"""
-
 
     # Tworzenie dużego słownika dla danych PnVa
         for cegla in self.cegly:
@@ -148,6 +144,7 @@ class Read_input(SQliteEdit):
         for sheet_name in self.wb_sheets:
             zakladka = self.wb.get_sheet_by_name(sheet_name)
             size = zakladka.calculate_dimension()        # zwraca wielkość zakładki w postaci stringa --> A1:T60
+
             for row in zakladka.iter_rows(size):
                 for cell in row:
                     for lek in self.output_leki_cegly:
@@ -162,7 +159,7 @@ class Read_input(SQliteEdit):
                             for cegla in self.cegly:
                                 x = self.cegly_position[sheet_name][cegla][0]
                                 y = self.cegly_position[sheet_name][cegla][1]
-                                if cell.row >= x and cell.row <= y:
+                                if y >= cell.row >= x:
                                     self.CEGLY_data[cegla][lek]["PnVa"] = [round(wart1, 2),
                                                                            round(wart2, 2),
                                                                            round(wart3, 2)]
@@ -172,15 +169,10 @@ class Read_input(SQliteEdit):
                                     if hit_number == 0:
                                         break
 
-        print "\nzawartość słownika --> self.CEGLY_data\n"
-        for k, v in self.CEGLY_data.iteritems():
-            print 5 * "xx"
-            print k, v
-
-    def get_PnVa_UNITS_data(self):
+    def get_PnVa_UNITS_data(self, profile_name):
         """ Metoda wypełnia danymi z pliku input dwa słowniki odpowiednio dla danych PnVa oraz UNITS"""
 
-        self.get_data_from_profile('ProfilTestowy1')     # pobieranie danych dla profilu TOP TRZEBA przenieść !!!!!!!!
+        self.get_data_from_profile(profile_name)     # pobieranie danych dla profilu TOP TRZEBA przenieść !!!!!!!!
 
     # Tworzenie dużego słownika dla danych PnVa
         for no_x in range(len(self.output_zakladki)):
@@ -200,16 +192,6 @@ class Read_input(SQliteEdit):
         [self.uzupelnianie_tabeli_PnVa_UNITS(self.output_leki[elem], self.output_zakladki[elem], self.UNITS)
          for elem in range(len(self.output_zakladki))]            # a może by zastosować funkcję map......
 
-        # print "\nzawartość słownika --> self.PnVa_data\n"
-        # for k, v in self.PnVa_data.iteritems():
-        #     print 5 * "xx"
-        #     print k, v
-        #
-        # print "\nzawartość słownika --> self.UNITS_data\n"
-        # for k, v in self.UNITS_data.iteritems():
-        #     print 5 * "xx"
-        #     print k, v
-
     # UZUPEŁANIANIE dużego słownika dla danych PnVa lub UNITS
     def uzupelnianie_tabeli_PnVa_UNITS(self, lista_lekow, nazwa_zakladki, rodzaj_danych):
         """ Funckcja zbiera wartości z pliku input i zapisuje je w tabeli / słowniku PnVa UNITS"""
@@ -228,6 +210,7 @@ class Read_input(SQliteEdit):
         for sheet_name in self.wb_sheets:
             zakladka = self.wb.get_sheet_by_name(sheet_name)
             size = zakladka.calculate_dimension()        # zwraca wielkość zakładki w postaci stringa --> A1:T60
+
             for row in zakladka.iter_rows(size):
                 for cell in row:
                     for lek in lista_lekow:
@@ -239,7 +222,7 @@ class Read_input(SQliteEdit):
                             for cegla in self.cegly:
                                 x = self.cegly_position[sheet_name][cegla][0]
                                 y = self.cegly_position[sheet_name][cegla][1]
-                                if cell.row >= x and cell.row <= y:
+                                if y >= cell.row >= x:
                                     slownik[nazwa_zakladki][lek][cegla][0] = round(wart1, 2)
                                     slownik[nazwa_zakladki][lek][cegla][1] = round(wart2, 2)
                                     slownik[nazwa_zakladki][lek][cegla][2] = round(wart3, 2)
@@ -249,25 +232,63 @@ class Read_input(SQliteEdit):
 
 if __name__ == '__main__':
 
+    input_file_path1 = "/home/marcin/Pulpit/MyProjectGitHub/report1.xlsx"
+    input_file_path2 = "/home/marcin/Pulpit/MyProjectGitHub/report2.xlsx"
 
-
-    input1 = Read_input(input_file_path1)
-    print "input1"
-    print input1.cegly
-    # print input1.daty
+    # input1 = Read_input(input_file_path1)
+    #
+    # input1.open_input_file()        # otwarcie pliku input z danymi
+    # input1.get_date()               # odczytanie daty z pliku input z danymi
+    # input1.get_PnVa_Units_column()  # znalezienie kolumn zawierających dane PnVa oraz UNITS
+    # input1.get_cegla_positions()    # zbiera lokalizacje danych dla poszczególnych cegieł w zakładkach
+    #
+    #
+    # print "input1.daty", input1.daty
+    #
     # print "zawartość słownika --> self.cegly_position"
     # for k, v in input1.cegly_position.iteritems():
     #     print k, v
+    # print 50 * "xxx"
+    #
+    # input1.get_Cegly_data()
+    # input1.get_PnVa_UNITS_data('ProfilTestowy1')
+    #
+    # print "input1.PnVa_data", input1.PnVa_data
+    # print 50 * "%%%"
+    # print "input1.UNITS_data", input1.UNITS_data
+    # print 50 * "%%%"
+    # print "input1.CEGLY_data", input1.CEGLY_data
+    # print 50 * "%%%"
+    # print "input1 OK"
+
+
+
+
+    input2 = ReadInput(input_file_path2)
+
+    input2.open_input_file()        # otwarcie pliku input z danymi
+    input2.get_date()               # odczytanie daty z pliku input z danymi
+    input2.get_PnVa_Units_column()  # znalezienie kolumn zawierających dane PnVa oraz UNITS
+    input2.get_cegla_positions()    # zbiera lokalizacje danych dla poszczególnych cegieł w zakładkach
+
+
+    print "input2.daty", input2.daty
+
+    print "zawartość słownika --> self.cegly_position"
+    for k, v in input2.cegly_position.iteritems():
+        print k, v
     print 50 * "xxx"
 
-    input1.get_Cegly_data()
+    input2.get_Cegly_data()
+    input2.get_PnVa_UNITS_data('ProfilTestowy1')
 
-
-    # input1.get_PnVa_UNITS_data()
-    # print input1.PnVa_data
+    print "input2.PnVa_data", input2.PnVa_data
     print 50 * "%%%"
+    print "input2.UNITS_data", input2.UNITS_data
+    print 50 * "%%%"
+    print "input2.CEGLY_data", input2.CEGLY_data
+    print 50 * "%%%"
+    print "input2 OK"
 
-
-    print "output_zakladki", self.output_zakladki
 
 

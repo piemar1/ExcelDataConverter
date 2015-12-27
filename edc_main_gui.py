@@ -1,6 +1,5 @@
 # ! /usr/bin/env python
 # -*- coding: utf-8 -*-
-__author__ = 'Marcin Pieczyński'
 
 import sqlite3 as lite
 import Tkinter
@@ -11,25 +10,17 @@ import tkFileDialog
 
 from edc_sqlite import SQliteEdit
 from edc_init import LicenceCheck
-from edc_read_input import Read_input
+from edc_read_input import ReadInput
 
 import EDC_write_output
 import edc_profile_manager
 
-# import read_input
-# import write_output
-
-# print globals()
-# print "#######################################################3"
-# print dir(EDC_init)
-# for k, v in globals().iteritems():
-#     print k, v
+__author__ = 'Marcin Pieczyński'
 
 # style_bold8 = easyxf('font: name Tahoma, bold on, height 160;')
 # style_no_bold = easyxf('font: name Tahoma, height 160;')
 
-
-top_info = """\t\t\t\t\tEXCEL Data Converter\n\n"\
+top_info = "\t\t\t\t\tEXCEL Data Converter\n\n"\
            "Program służy do filtrowania danych z pliku wejściowego excel i ich zapisu w plikach wyjściowych excel.\n\n" \
            "W celu filtrowania danych należy dokonać wyboru pliku wejściowego z danymi excel oraz trzech plików " \
            "wyjściowych, w których dane zostaną zapisane. Należy również wybrać profil filtrowania - czyli sposób " \
@@ -63,9 +54,13 @@ top_info = """\t\t\t\t\tEXCEL Data Converter\n\n"\
            "Excel ma wiele możliwośc by przetważać i przedstawiać informacje według potrzeb, " \
            "czemu tego nie zautomatyzować? \n\n"\
            "W przypadku pytań lub problemów chętnię pomogę. \n\n"\
-           "\t\t\t\t\t      Marcin Pieczyński \n\t\t\t\t\t marcin-pieczynski@wp.pl"""
+           "\t\t\t\t\t      Marcin Pieczyński \n\t\t\t\t\t marcin-pieczynski@wp.pl"
 
-class InformacjaTop():
+
+class InformacjaTop(object):
+    """
+    Window with information about usage the program.
+    """
     def __init__(self):
         info = Tkinter.Tk()
         info.wm_title("Excel Data Converter - Informacje")
@@ -76,11 +71,14 @@ class InformacjaTop():
         label = Tkinter.Label(info, text=top_info, height=42, justify="left", wraplength=600)
         label.grid(row=0, column=0, sticky="ew")
 
-        Button = Tkinter.Button(info, text="Zamknij", borderwidth=2, command=info.destroy, padx=20)
-        Button.grid(row=1, column=0, sticky="nswe")
+        button = Tkinter.Button(info, text="Zamknij", borderwidth=2, command=info.destroy, padx=20)
+        button.grid(row=1, column=0, sticky="nswe")
 
 
 class MainGui(LicenceCheck, SQliteEdit):
+    """
+    Class containing main gui of the program and all methods connected with the gui.
+    """
     def __init__(self):
 
         LicenceCheck.__init__(self)
@@ -102,104 +100,126 @@ class MainGui(LicenceCheck, SQliteEdit):
         self.filepath_CEGLY = Tkinter.StringVar()
 
         self.licence_days = "Do końca licencji pozostało " + str(self.delta) + " dni."
-
         self.progres_step = 0
 
         self.interface_elem()
         self.top.mainloop()
 
     def start_progres_bar(self):
-        progres["value"] = self.progres_step
-        # print "step", step
+        """Start of the progres bar."""
+        self.progres["value"] = self.progres_step
 
-    def ad_step_to_progres_bar(self,n):
+    def ad_step_to_progres_bar(self, n):
+        """Update of the progres bar."""
         self.progres_step += n
-        progres["value"] = self.progres_step
-        progres.update_idletasks()
-        # print "step", step
-
+        self.progres["value"] = self.progres_step
+        self.progres.update_idletasks()
 
     def input_file(self):
-        """ okno wprowadzające plik z danych wejściowymi"""
+        """ Method for introduction an input file with data for filtration."""
         try:
             f = tkFileDialog.askopenfilename(parent=self.top, initialdir="/home/marcin/pulpit/Py/",
                                              title="Wybór pliku excel z danymi", filetypes=[("Excel file", ".xlsx")])
             self.filepath_input.set(os.path.realpath(f))
             self.excel_input_file = os.path.realpath(f)
             self.imputnumber += 1
-        except ValueError: pass        #!!!!!!!!!!!! Dodać Error związany z plikiem !!!!!
+        except ValueError:
+            tkMessageBox.showerror("Error", " Wystąpił problem z załadowaniem pliku excel z danymi.")
 
     def save_filePnVa(self):
-        """ Okno wprowadzające dane dla pliku z danych wyjściowymi PnVa"""
+        """ Method for introduction an output file with PnVa data. """
         try:
             save = tkFileDialog.asksaveasfilename(parent=self.top, initialdir="/home/marcin/pulpit/",
-                                         title="Wybór pliku do zapisu danych PnVa", filetypes=[("Excel file", ".xlsx")])
+                                                  title="Wybór pliku do zapisu danych PnVa",
+                                                  filetypes=[("Excel file", ".xlsx")])
             self.filepath_PnVa.set((os.path.realpath(save))+".xlsx")
             self.PnVa_file = os.path.realpath(save)+".xlsx"
             self.PvNanumber += 1
-        except ValueError: pass
+        except ValueError:
+            tkMessageBox.showerror("Error", " Wystąpił problem z plikiem do zapisu danych PnVa.")
 
     def save_fileUNITS(self):
-        """ Okno wprowadzające dane dla pliku z danych wyjściowymi UNITS"""
-
+        """ Method for introduction an output file with UNITS data. """
         try:
             save = tkFileDialog.asksaveasfilename(parent=self.top, initialdir="/home/marcin/pulpit/",
-                                         title="Wybór pliku do zapisu danych UNITS",
-                                         filetypes = [("Excel file", ".xlsx")])
+                                                  title="Wybór pliku do zapisu danych UNITS",
+                                                  filetypes = [("Excel file", ".xlsx")])
             self.filepath_UNITS.set((os.path.realpath(save))+".xlsx")
             self.UNITS_file = os.path.realpath(save)+".xlsx"
             self.UNITSnumber += 1
-        except ValueError: pass
+        except ValueError:
+            tkMessageBox.showerror("Error", " Wystąpił problem z plikiem do zapisu danych UNITS.")
 
     def save_fileCEGLY(self):
-        """ Okno wprowadzające dane dla pliku z danych wyjściowymi UNITS"""
+        """ Method for introduction an output file with area data. """
         try:
             save = tkFileDialog.asksaveasfilename(parent=self.top, initialdir="/home/marcin/pulpit/",
-                                         title="Wybór pliku do zapisu danych z Cegieł",
-                                         filetypes = [("Excel file", ".xlsx")])
+                                                  title="Wybór pliku do zapisu danych z Cegieł",
+                                                  filetypes=[("Excel file", ".xlsx")])
             # fc = open(save,"w")
             self.filepath_CEGLY.set((os.path.realpath(save))+".xlsx")
             self.CEGLY_file = os.path.realpath(save)+".xlsx"
             self.Ceglynumber += 1
-        except ValueError: pass
+        except ValueError:
+            tkMessageBox.showerror("Error", " Wystąpił problem z plikiem do zapisu danych z Cegieł.")
 
     def open_profile_menager(self):
-        """ importuje i uruchamia menadżer profili"""
+        """ Methods lounching profile manager."""
         reload(edc_profile_manager)
         edc_profile_manager.ProfileMenager()
 
+    def error_no_profile(self):
+        tkMessageBox.showerror("Błąd, Nie wybrano profilu.",
+                               "Należy dokonać wyboru profilu do filtrowania danych, "
+                               "szczegóły poszczególnych profili można znaleść w Menadżeże Profili")
+
+    def error_no_files(self):
+        tkMessageBox.showerror(" Błąd, Nie wybrano nazw plików. ",
+                       "Przed konwersją danych należy wybrać plik wejściowy zawierające dane Excel "
+                       "oraz podać nazwy dla 3 plików wyjściowych w których program zapisze dane.")
+
+    def work_finished(self):
+        tkMessageBox.showinfo("Yes...", "Dokonano konwersji danych. \n Życzę miłego dnia.")
+
     def KRKA_data_convert(self):
-        """ Funkcja wywołująca całościową konwersję danych uruchamiająca wiele innych funkcji"""
+        """ Important !  Method for carrying out reading, filtration and saving of excel data. """
 
         profil = self.com_choosen_profile.get()
+        # print profil
 
         if profil == "Wybierz profil":
-            tkMessageBox.showerror("Błąd, Nie wybrano profilu.",
-                                   "Należy dokonać wyboru profilu do filtrowania danych, "
-                                   "szczegóły poszczególnych profili można znaleść w Menadżeże Profili")
-        print profil
+            return self.error_no_profile()
 
         if self.imputnumber == 0 or self.PvNanumber == 0 or self.UNITSnumber == 0 or self.Ceglynumber == 0:
-            ##
-            #    NAleży usunąć te cyferki i zostawić nazwy !!!!!!!!!!!
-            #
-                    tkMessageBox.showerror(" Błąd, Nie wybrano nazw plików. ",
-                                           "Przed konwersją danych należy wybrać plik wejściowy zawierające dane Excel "
-                                           "oraz podać nazwy dla 3 plików wyjściowych w których program zapisze dane.")
+            return self.error_no_files()
 
         if self.imputnumber and self.PvNanumber and self.UNITSnumber and self.Ceglynumber \
                 and profil != "Wybierz profil":
-
             tkMessageBox.showinfo("Yes... do roboty !!!",
                                   "Profil filtrowania danych i pliki wybrane ... przystępujemy do konwersji danych...")
 
-            # FUNKCJA wykonująca właściwą konwersję danych !!!
+    ###############################################################
+    # Functions for for carrying out reading, filtration and saving of excel data.
 
-            # wczytanie pliku wejściowego oraz zawartych w nich danych
-            excel_input_file = Read_input(self.excel_input_file)
+    # Reading of input data for excel file.
+
+            self.start_progres_bar()                             ;self.ad_step_to_progres_bar(5)
+
+            excel_input_file = ReadInput(self.excel_input_file)  ;self.ad_step_to_progres_bar(5)
+            excel_input_file.open_input_file()                   ;self.ad_step_to_progres_bar(5)
+            excel_input_file.get_date()                          ;self.ad_step_to_progres_bar(5)
+            excel_input_file.get_PnVa_Units_column()             ;self.ad_step_to_progres_bar(5)
+            excel_input_file.get_cegla_positions()               ;self.ad_step_to_progres_bar(5)
+            excel_input_file.get_Cegly_data()                    ;self.ad_step_to_progres_bar(5)
+            excel_input_file.get_PnVa_UNITS_data(self.com_choosen_profile.get())
+            self.ad_step_to_progres_bar(5)
+
+            print "Odczytanie danych z pliku input OK"
 
 
-            # self.start_progres_bar()                                            #    ;ad_step(5)
+
+
+
             # get_data()                                             ;ad_step(15)
             # start_input(excel_input_file)                          ;ad_step(10)
             # # date_finding()                                         ;ad_step(10)
@@ -207,26 +227,28 @@ class MainGui(LicenceCheck, SQliteEdit):
             # KRKA_excel_data_converter(UNITS_file, "UNITS REPORT")  ;ad_step(20)
             # KRKA_data_converter_cegly(CEGLY_file)                  ;ad_step(20)
 
-            tkMessageBox.showinfo("Yes...", "Dokonano konwersji danych. \n Życzę miłego dnia.")
+            ##################################################################
 
-    # Główne GUI
+            return self.work_finished()
+
+    # Main GUI
     #########################################3
 
     def interface_elem(self):
-        """ Tworzenie poszczególnych elementów GUI"""
+        """ Methods for creating main GUI."""
 
-        self.get_tables_from_db()
+        self.get_tables_from_db()                  # Reading profile from sqlite
 
-        # tekst intro
+        # intro
         l_intro = Tkinter.Label(self.top, text=self.intro, relief="ridge", pady=2, padx=400)
 
         b_instruction = Tkinter.Button(self.top, text="Instrukcja obsługi programu", borderwidth=2, bg="orange",
-                                command= InformacjaTop, pady=5, padx=20)
+                                       command=InformacjaTop, pady=5, padx=20)
         # ==========================================================
         buttons = Tkinter.Frame(self.top).grid(row=1, column=0, columnspan=9, sticky="nswe")
 
-        b_profile_menager = Tkinter.Button(buttons, text= "Otwórz Menadżer Profili", padx=30, pady=10,
-                                        command=self.open_profile_menager)
+        b_profile_menager = Tkinter.Button(buttons, text="Otwórz Menadżer Profili", padx=30, pady=10,
+                                           command=self.open_profile_menager)
 
         b_profile_reload = Tkinter.Button(buttons, text="Odśwież listę profili",
                                           padx=30, pady=10, command=self.interface_elem)
@@ -254,7 +276,7 @@ class MainGui(LicenceCheck, SQliteEdit):
 
         # przycisk konwertowania danych !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         b_convert = Tkinter.Button(self.top, text="Konwertuj dane !!!", command=self.KRKA_data_convert)
-        progres_bar = ttk.Progressbar(self.top, orient= "horizontal", mode='determinate', maximum=100, length=250)
+        self.progres = ttk.Progressbar(self.top, orient="horizontal", mode='determinate', maximum=100, length=250)
 
         # Liczba dnia do końca licencji
         l_licence_info = Tkinter.Label(self.top, width=1, text=self.licence_days)
@@ -288,7 +310,7 @@ class MainGui(LicenceCheck, SQliteEdit):
         b_convert.grid(row=8, column=3, sticky="nswe")
 
         l_empty_line5 = Tkinter.Label(self.top).grid(row=9, column=0, columnspan=5)
-        progres_bar.grid(row=10, column=3, columnspan=1)
+        self.progres.grid(row=10, column=3, columnspan=1)
 
         empty_line6 = Tkinter.Label(self.top).grid(row=11, column=0, columnspan=5)
 
@@ -298,16 +320,20 @@ class MainGui(LicenceCheck, SQliteEdit):
         for x in range(9):
             self.top.grid_columnconfigure(x,weight=1)
 
-        return progres_bar, self.com_choosen_profile
+        return self.progres, self.com_choosen_profile
 
 
 
 if __name__ == '__main__':
 
-    lic = edc_init.LicenceCheck()
+    input_file_path2 = "/home/marcin/Pulpit/MyProjectGitHub/report2.xlsx"
+    output_file_PnVa = "/home/marcin/Pulpit/a.xlsx"
+    output_file_UNITS = "/home/marcin/Pulpit/b.xlsx"
+    output_file_CEGLY = "/home/marcin/Pulpit/c.xlsx"
 
-    MainGui()
-    Tkinter.mainloop()
+    maingui = MainGui()
+    maingui.interface_elem()
+
 
 
 
