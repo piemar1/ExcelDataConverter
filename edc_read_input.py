@@ -11,7 +11,7 @@ __author__ = 'Marcin Pieczyński'
 class ReadInput(SQliteEdit):
     """Klasa zawierająca metody czytania danych z pliku excel input"""
 
-    def __init__(self):
+    def __init__(self, profile_name):
         """ Inicjalizuje obiekt pliku input - jako plik excel. """
         SQliteEdit.__init__(self)
 
@@ -30,6 +30,8 @@ class ReadInput(SQliteEdit):
         self.PnVa_data = {}           # dane PnVa dla wybranych leków i cegieł
         self.UNITS_data = {}          # dane UNITS dla wybranych leków i cegieł
         self.CEGLY_data = {}          # dane PnVa oraz UNITS dla wybranych leków i cegieł
+
+        self.get_data_from_profile(profile_name)     # pobieranie danych dla profilu
 
         # self.cegly_position = {sheet_name:{"cegla1":[10,20], "cegla2":[20,30],...kolejne cegły..},
         #                        sheet_name:{"cegla1":[10,20], "cegla2":[20,30],...kolejne cegły..},
@@ -118,11 +120,8 @@ class ReadInput(SQliteEdit):
 
             # int(no_of_row) często wykracza znacząco poza rzeczywistą wielkość tabeli
 
-    def get_Cegly_data(self, profile_name):
+    def get_Cegly_data(self):
         """ Metoda wypełnia danymi z pliku input słownik dla danych PnVa oraz UNITS dla cegiel"""
-
-        self.get_data_from_profile(profile_name)     # pobieranie danych dla profilu
-
 
         print "self.output_leki_cegly", self.output_leki_cegly
     # Tworzenie dużego słownika dla danych PnVa i UNITS
@@ -165,10 +164,8 @@ class ReadInput(SQliteEdit):
                                     if hit_number == 0:
                                         break
 
-    def get_PnVa_UNITS_data(self, profile_name):
+    def get_PnVa_UNITS_data(self):
         """ Metoda wypełnia danymi z pliku input dwa słowniki odpowiednio dla danych PnVa oraz UNITS"""
-
-        self.get_data_from_profile(profile_name)     # pobieranie danych dla profilu
 
     # Tworzenie dużego słownika dla danych PnVa
         for no_x in range(len(self.output_zakladki)):

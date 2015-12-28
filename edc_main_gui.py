@@ -203,14 +203,14 @@ class MainGui(LicenceCheck, SQliteEdit):
 
             self.start_progres_bar()
 
-            excel_input_file = ReadInput()                          ;self.ad_step_to_progres_bar(5)
-            excel_input_file.open_input_file(self.excel_input_file) ;self.ad_step_to_progres_bar(5)
-            excel_input_file.get_date()                             ;self.ad_step_to_progres_bar(5)
-            excel_input_file.get_PnVa_Units_column()                ;self.ad_step_to_progres_bar(5)
-            excel_input_file.get_cegla_positions()                  ;self.ad_step_to_progres_bar(5)
-            excel_input_file.get_Cegly_data(self.com_choosen_profile.get())
+            excel_input_file = ReadInput(self.com_choosen_profile.get());self.ad_step_to_progres_bar(5)
+            excel_input_file.open_input_file(self.excel_input_file)     ;self.ad_step_to_progres_bar(5)
+            excel_input_file.get_date()                                 ;self.ad_step_to_progres_bar(5)
+            excel_input_file.get_PnVa_Units_column()                    ;self.ad_step_to_progres_bar(5)
+            excel_input_file.get_cegla_positions()                      ;self.ad_step_to_progres_bar(5)
+            excel_input_file.get_Cegly_data()
             self.ad_step_to_progres_bar(5)
-            excel_input_file.get_PnVa_UNITS_data(self.com_choosen_profile.get())
+            excel_input_file.get_PnVa_UNITS_data()
             self.ad_step_to_progres_bar(5)
             print "Odczytanie danych z pliku input OK"
 
