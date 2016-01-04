@@ -10,7 +10,7 @@ __author__ = 'Marcin Pieczyński'
 
 
 """
-Module for initialization of Excel Data Converter application.
+Module for initialization Excel Data Converter application.
 After launching it checks if licence for this pc is valid.
 Eventually it launches GUI from edc_main_gui.py file.
 """
@@ -18,11 +18,10 @@ Eventually it launches GUI from edc_main_gui.py file.
 
 class LicenceCheck:
     """
-    Class containing methods for checking if the licence is valid for this pc and for the date of use.
+    The Class containing methods for checking if the licence is valid for this pc and for the date of use.
     """
-
     def __init__(self):
-        self.expiry_date = [2015, 12, 30]    # IMPORTANT  - Expiration of license
+        self.expiry_date = [2016, 12, 20]    # IMPORTANT  - Expiration of license
         self.my_pc_win = [132098963232679]   # id of my PC-win
         self.my_pc_lin = [272774785408889]   # id of my PC-lin
         self.pc_license_list = None          # list with pc with valid licence
@@ -35,8 +34,9 @@ class LicenceCheck:
         self.count_exipy_days()
 
     def check_ip(self):
-        """ Method for checking licence for this pc"""
-
+        """
+        The method for checking licence for this pc.
+        """
         try:
             self.pc_license_list = pickle.load(open("license.p", "rb"))
             this_pc = uuid.getnode()
@@ -56,13 +56,12 @@ class LicenceCheck:
                     self.license_for_this_pc = False         # Licence is not valid
         except IOError:
             pass
-        print "self.pc_license_list", self.pc_license_list
+        # print "self.pc_license_list", self.pc_license_list
 
     def count_exipy_days(self):
         """
-        Method for counting the number of days of validity of license.
+        The method for counting the number of days of validity of license.
         """
-
         ex_year, ex_month, ex_day = self.expiry_date
         now = datetime.datetime.now()
         current_year, current_month, current_day = now.year, now.month, now.day
@@ -74,25 +73,34 @@ class LicenceCheck:
         if self.delta >= 0:
             self.licence_is_valid = True
 
-
-if __name__ == "__main__":
-
-    license = LicenceCheck()
-
-    if license.license_for_this_pc and license.licence_is_valid:
-
-        from edc_main_gui import MainGui
-        MainGui()
-
-    elif license.license_for_this_pc is False:
+    def no_licence(self):
+        """
+        The window with message informing of lacking of licence for this PC.
+        """
         tkMessageBox.showerror("Brak ważnej licencji.",
-                               "Nie posiadasz licencji na uruchomiwnie programu Excel Data Converter."
+                               "Nie posiadasz licencji na uruchomiwnie programu Excel Data Converter. "
                                "W celu korzystania z programu skontaktuj się z Marcinem Pieczyńskim."
                                "\n\n marcin-pieczynski@wp.pl")
-    elif license.licence_is_valid is False:
+
+    def licence_no_valid(self):
+        """
+        The window with message informing that licence has expired.
+        """
         tkMessageBox.showerror("Brak ważnej licencji",
                                "Licencja na użytkowanie programu Excel Data Converter zakończyła się. "
                                "W celu dalszego korzystania z programu skontaktuj się z Marcinem Pieczyńskim."
                                "\n\n marcin-pieczynski@wp.pl")
 
+if __name__ == "__main__":
 
+    lic = LicenceCheck()
+
+    if lic.license_for_this_pc and lic.licence_is_valid:
+        from edc_main_gui import MainGui
+        MainGui()
+
+    elif lic.license_for_this_pc is False:
+        lic.no_licence()
+
+    elif lic.licence_is_valid is False:
+        lic.licence_no_valid()

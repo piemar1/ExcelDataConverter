@@ -1,81 +1,68 @@
 # ! /usr/bin/env python
 # -*- coding: utf-8 -*-
-__author__ = 'Marcin Pieczyński'
-
 
 import sqlite3 as lite
 
+__author__ = 'Marcin Pieczyński'
+
 
 class SQliteEdit:
+    """
+    The Class containing methods for reading and saving profiles in Profile_database.db file.
+    """
     def __init__(self):
-
-        self.profiles_name_list = []
-        self.con = lite.connect('Profile_database.db')  # Owieranie pliku bazy danych1
+        """
+        Init method of SQliteEdit class.
+        """
+        self.con = lite.connect('Profile_database.db')               # Opening of database file
         self.cursor = self.con.cursor()
 
+        self.profiles_name_list = []
         self.output_zakladki = []
         self.output_leki = []
         self.output_leki_cegly = []
         self.output_lista_cegiel = []
 
     def get_tables_from_db(self):
-        """ Zczytuje nazwy tebelek z pliku db SQlite potrzebne do wyboru profilu"""
-
+        """
+        The method for reading tables names from db.
+        """
         self.cursor.execute("SELECT name FROM sqlite_master WHERE type = 'table';")
-        self.profiles_name_list = []
 
-        lista = (self.cursor.fetchall())      # Zwraca listę krotek zawierającą stringi z nazwami tabel
-        for elem in lista:
-            self.profiles_name_list.append(elem[0])
-
+        # Return list of tuples with the names of tables --> names of profiles.
+        self.profiles_name_list = [elem[0] for elem in self.cursor.fetchall()]
         self.profiles_name_list = tuple(self.profiles_name_list)
-        print self.profiles_name_list
 
-    def get_data_from_profile(self, profil_to_use):
-        """ Zczytuje dane dla wybranego profilu z pliku SQlite db
-        potrzebne to filtorowania i konwersji danych"""
+    def get_data_from_profile(self, profile_to_use):
+        """
+        The methods for reading data from profile
+        """
+        self.cursor.execute("SELECT * FROM " + profile_to_use)
 
-        print profil_to_use
-
-        self.cursor.execute("SELECT * FROM " + profil_to_use)
-        from_db = self.cursor.fetchall()
-
-        for row in from_db:
+        for row in self.cursor.fetchall():
             if row[0] == "PvNa_UNITS":
                 self.output_zakladki.append(row[1])
-                a = []
-                b = row[2].split(",")
-                for elem in b:
-                    el = elem.strip()
-                    a.append(el)
+                a = [elem.strip() for elem in row[2].split(",")]
                 self.output_leki.append(a)
 
-            if row[0] == "CEGLY":
-                b = row[2].split(",")
-                for elem in b:
-                    el = elem.strip()
-                    self.output_leki_cegly.append(el)
+            elif row[0] == "CEGLY":
+                self.output_leki_cegly = [elem.strip() for elem in row[2].split(",")]
 
-            if row[0] == "lista_cegiel":
-                nazwa_cegla_list = row[2]
-                lista = nazwa_cegla_list.split(",")
-                for elem in lista:
-                    el = elem.strip()
-                    self.output_lista_cegiel.append(el)
+            elif row[0] == "lista_cegiel":
+                self.output_lista_cegiel = [elem.strip() for elem in row[2].split(",")]
 
-    def SQsave_profile(self, nazwa, final_profile):
-        """Zapisuje profil o nazwie nazwa oraz zawartości final_profil w bazie SQlite"""
-
+    def sqsave_profile(self, nazwa, final_profile):
+        """
+        The methods for saving prifile in db file
+        """
         self.cursor.execute("DROP TABLE IF EXISTS " + nazwa)
         self.cursor.execute("CREATE TABLE " + nazwa + "(Typ TEXT, Id_Grupy TEXT, lek TEXT)")
         self.cursor.executemany("INSERT INTO " + nazwa + " VALUES(?, ?, ?)", final_profile)
 
-    def SQedit_profile(self,profil_to_edit):
-        """ Odczytuje zawartość profilu """     # Metoda czeka na napisanie
-        pass
-
-    def SQdel_profile(self,profile_to_del):
-        """ Usuwa wskazany profil profile_to_del z bazy SQlite"""
+    def sqdel_profile(self, profile_to_del):
+        """
+        The methods for deleting profile.
+        """
         self.cursor.execute("DROP TABLE IF EXISTS " + profile_to_del)
 
 
@@ -92,14 +79,3 @@ if __name__ == '__main__':
         print "output_leki  ", elem
 
     print "output_leki_cegly    ", m.output_leki_cegly
-
-
-
-
-    # print 50 * "XXX"
-    # SQliteEdit().get_data_from_profile('ProfilTestowy2')
-    # print 50 * "XXX"
-    # SQliteEdit().get_data_from_profile('ProfilTestowy3')
-
-
-
