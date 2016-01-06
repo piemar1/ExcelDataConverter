@@ -56,7 +56,6 @@ class LicenceCheck:
                     self.license_for_this_pc = False         # Licence is not valid
         except IOError:
             pass
-        # print "self.pc_license_list", self.pc_license_list
 
     def count_exipy_days(self):
         """

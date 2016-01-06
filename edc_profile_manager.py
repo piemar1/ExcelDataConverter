@@ -61,16 +61,13 @@ class ProfileManagerInfo(object):
     """
     The window with information about usage the Profile Manager.
     """
-
     def __init__(self):
 
         info = Tkinter.Tk()
         info.wm_title("Menadżer profili - Informacje")
         info.wm_resizable(width="true", height="true")
-        # info.minsize(width=500, height=500)
-        # info.maxsize(width=500, height=500)
 
-        label = Tkinter.Label(info, text=Men_info, height=40, justify="left", wraplength=700)
+        label = Tkinter.Label(info, text=Men_info, height=40, justify="left", wraplength=800)
         label.grid(row=0, column=0, padx=10, sticky="ew")
         button = Tkinter.Button(info, text="Zamknij", borderwidth=2, command=info.destroy, padx=20)
         button.grid(row=1, column=0, sticky="nswe")
@@ -141,13 +138,12 @@ class ProfileManager(SQliteEdit):
         Converting text from Entry and Text fields for adong or removing of windows.
         """
         self.profile_PnVA_Units = []
+
         for x in range(len(self.entrylistA)):
-            a = []
             nazwagrupy = self.entrylistA[x].get()
             nazwalekow = str(self.textlistA[x].get(1.0, 'end'))[:-1]
-            a.append(nazwagrupy)
-            a.append(nazwalekow)
-            self.profile_PnVA_Units.append(a)
+
+            self.profile_PnVA_Units.append([nazwagrupy, nazwalekow])
 
     def dodanie_grupy(self):
         """
@@ -295,8 +291,7 @@ class ProfileManager(SQliteEdit):
         The methods creating first (upper) part of GUI elements.
         """
         self.get_tables_from_db()
-        szerokosc = 47
-        wysokosc = 5
+        szerokosc, wysokosc = 47, 5
 
         # Frames in GUI
         title = Tkinter.Frame(self.inerframe)

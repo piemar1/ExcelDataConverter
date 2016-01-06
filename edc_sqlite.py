@@ -42,6 +42,7 @@ class SQliteEdit:
         for row in self.cursor.fetchall():
             if row[0] == "PvNa_UNITS":
                 self.output_zakladki.append(row[1])
+
                 a = [elem.strip() for elem in row[2].split(",")]
                 self.output_leki.append(a)
 
@@ -64,18 +65,3 @@ class SQliteEdit:
         The methods for deleting profile.
         """
         self.cursor.execute("DROP TABLE IF EXISTS " + profile_to_del)
-
-
-if __name__ == '__main__':
-    m = SQliteEdit()
-    m.get_tables_from_db()
-
-    m.get_data_from_profile('ProfilTestowy1')
-
-    print "output_zakladki  ", m.output_zakladki
-    print "output_lista_cegiel  ", m.output_lista_cegiel
-
-    for elem in m.output_leki:
-        print "output_leki  ", elem
-
-    print "output_leki_cegly    ", m.output_leki_cegly

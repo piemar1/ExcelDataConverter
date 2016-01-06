@@ -67,7 +67,7 @@ class ReadInput(SQliteEdit):
         """
         for sheet_name in self.wb_sheets:
             zakladka = self.wb.get_sheet_by_name(sheet_name)
-            size = zakladka.calculate_dimension()             #
+            size = zakladka.calculate_dimension()
 
             for row in zakladka.iter_rows(size):
                 for cell in row:
@@ -88,7 +88,7 @@ class ReadInput(SQliteEdit):
 
             for r in range(no_of_row):                          # iteration for row
                 wart = zakladka["A" + str(r+1)].value
-                if wart and wart.strip() not in self.cegly:     # RE ????
+                if wart and wart.strip() not in self.cegly:
                     self.cegly.append(wart.strip())
 
         for sheet_name in self.wb_sheets:
@@ -111,9 +111,7 @@ class ReadInput(SQliteEdit):
                 self.cegly_position[sheet_name][self.cegly[x]][1] = positions[x+1]-1
 
             self.cegly_position[sheet_name][self.cegly[-1]][0] = positions[-1]
-            self.cegly_position[sheet_name][self.cegly[-1]][1] = int(no_of_row)    # To miejsce można zooptymalizować
-
-            # int(no_of_row) często wykracza znacząco poza rzeczywistą wielkość tabeli
+            self.cegly_position[sheet_name][self.cegly[-1]][1] = int(no_of_row)
 
     def get_cegly_data(self):
         """
@@ -217,65 +215,3 @@ class ReadInput(SQliteEdit):
                                 slownik[nazwa_zakladki][lek][cegla][2] = round(wart3, 2)
                                 if hit_number == 0:
                                     break
-
-if __name__ == '__main__':
-
-    input_file_path1 = "/home/marcin/Pulpit/MyProjectGitHub/report1.xlsx"
-    input_file_path2 = "/home/marcin/Pulpit/MyProjectGitHub/report2.xlsx"
-
-    input2 = ReadInput('ProfilTestowy1')
-
-    input2.open_input_file(input_file_path2)        # otwarcie pliku input z danymi
-    input2.get_date()               # odczytanie daty z pliku input z danymi
-    input2.get_pnva_units_column()  # znalezienie kolumn zawierających dane PnVa oraz UNITS
-    input2.get_cegla_positions()    # zbiera lokalizacje danych dla poszczególnych cegieł w zakładkach
-
-    input2.get_cegly_data()
-    print 50 * "%%%"
-    print "input2.CEGLY_data", input2.CEGLY_data
-    print 50 * "%%%"
-
-    # print "input2.daty", input2.daty
-    #
-    # print "zawartość słownika --> self.cegly_position"
-    # for k, v in input2.cegly_position.iteritems():
-    #     print k, v
-    # print 50 * "xxx"
-
-    # input2.get_pnva_units_data('ProfilTestowy3')
-
-    # print "input2.PnVa_data", input2.PnVa_data
-    # print 50 * "%%%"
-    # print "input2.UNITS_data", input2.UNITS_data
-
-    # print 50 * "$$$"
-    # print "input2.output_zakladki", input2.output_zakladki
-    # print 50 * "$$$"
-    #
-    # print "input2 OK"
-
-    # input1 = Read_input(input_file_path1)
-    #
-    # input1.open_input_file()        # otwarcie pliku input z danymi
-    # input1.get_date()               # odczytanie daty z pliku input z danymi
-    # input1.get_pnva_units_column()  # znalezienie kolumn zawierających dane PnVa oraz UNITS
-    # input1.get_cegla_positions()    # zbiera lokalizacje danych dla poszczególnych cegieł w zakładkach
-    #
-    #
-    # print "input1.daty", input1.daty
-    #
-    # print "zawartość słownika --> self.cegly_position"
-    # for k, v in input1.cegly_position.iteritems():
-    #     print k, v
-    # print 50 * "xxx"
-    #
-    # input1.get_cegly_data()
-    # input1.get_pnva_units_data('ProfilTestowy1')
-    #
-    # print "input1.PnVa_data", input1.PnVa_data
-    # print 50 * "%%%"
-    # print "input1.UNITS_data", input1.UNITS_data
-    # print 50 * "%%%"
-    # print "input1.CEGLY_data", input1.CEGLY_data
-    # print 50 * "%%%"
-    # print "input1 OK"

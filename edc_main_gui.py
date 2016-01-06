@@ -62,10 +62,8 @@ class InformacjaTop(object):
         info = Tkinter.Tk()
         info.wm_title("Excel Data Converter - Informacje")
         info.wm_resizable(width="true", height="true")
-        # info.minsize(width=500, height=500)
-        # info.maxsize(width=500, height=500)
 
-        label = Tkinter.Label(info, text=top_info, height=42, justify="left", wraplength=600)
+        label = Tkinter.Label(info, text=top_info, height=42, justify="left", wraplength=700)
         label.grid(row=0, column=0, sticky="ew")
 
         button = Tkinter.Button(info, text="Zamknij", borderwidth=2, command=info.destroy, padx=20)
@@ -87,8 +85,6 @@ class MainGui(LicenceCheck, SQliteEdit):
         self.top.maxsize(width=1000, height=400)
         self.top.resizable(width=True, height=False)
 
-        self.intro = "\nExcel Data Converter\n"
-
         self.imputnumber = 0
         self.PvNanumber = 0
         self.UNITSnumber = 0
@@ -99,6 +95,7 @@ class MainGui(LicenceCheck, SQliteEdit):
         self.filepath_UNITS = Tkinter.StringVar()
         self.filepath_CEGLY = Tkinter.StringVar()
 
+        self.intro = "\nExcel Data Converter\n"
         self.licence_days = "Do końca licencji pozostało {} dni.".format(str(self.delta))
 
         self.excel_input_file = None
@@ -225,8 +222,7 @@ class MainGui(LicenceCheck, SQliteEdit):
         elif self.imputnumber and self.PvNanumber and self.UNITSnumber and self.Ceglynumber \
                 and profil != "Wybierz profil":
 
-            ###############################################################
-            # Methods for for carrying out reading, filtration and saving of excel data.
+            # Methods for carrying out reading, filtration and saving of excel data.
 
             start = time()
             self.start_progress_bar()
@@ -263,16 +259,16 @@ class MainGui(LicenceCheck, SQliteEdit):
             print "9", time() - start
             # print "START zapis danych PnVa do pliku output"
             output1 = WriteOutputPnVaUnitsPaternA(excel_input_file.output_zakladki,
-                                                  excel_input_file.PnVa_data)
+                                                  excel_input_file.PnVa_data,
+                                                  excel_input_file.output_lista_cegiel,
+                                                  excel_input_file.output_leki)
             print "10", time() - start
             self.ad_step_to_progress_bar(5)
             print "11", time() - start
             output1.start_output()
             self.ad_step_to_progress_bar(5)
             print "12", time() - start
-            output1.write_base_data(excel_input_file.output_lista_cegiel,
-                                    excel_input_file.output_leki,
-                                    excel_input_file.daty)
+            output1.write_base_data(excel_input_file.daty)
             print "13", time() - start
             self.ad_step_to_progress_bar(5)
             print "14", time() - start
@@ -292,16 +288,16 @@ class MainGui(LicenceCheck, SQliteEdit):
             # print "START zapis danych UNITS do pliku output"
 
             output2 = WriteOutputPnVaUnitsPaternA(excel_input_file.output_zakladki,
-                                                  excel_input_file.UNITS_data)
+                                                  excel_input_file.UNITS_data,
+                                                  excel_input_file.output_lista_cegiel,
+                                                  excel_input_file.output_leki,)
             print "19", time() - start
             self.ad_step_to_progress_bar(5)
             print "20", time() - start
             output2.start_output()
             self.ad_step_to_progress_bar(5)
             print "21", time() - start
-            output2.write_base_data(excel_input_file.output_lista_cegiel,
-                                    excel_input_file.output_leki,
-                                    excel_input_file.daty)
+            output2.write_base_data(excel_input_file.daty)
             print "22", time() - start
             self.ad_step_to_progress_bar(5)
             print "23", time() - start
@@ -349,14 +345,12 @@ class MainGui(LicenceCheck, SQliteEdit):
 
             return self.work_finished()
 
-    #####
     # Main GUI
 
     def interface_elem(self):
         """
         Methods for creating main GUI.
         """
-
         self.get_tables_from_db()                  # Reading profile from sqlite
 
         # intro
