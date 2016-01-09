@@ -21,7 +21,7 @@ class LicenceCheck:
     The Class containing methods for checking if the licence is valid for this pc and for the date of use.
     """
     def __init__(self):
-        self.expiry_date = [2016, 12, 20]    # IMPORTANT  - Expiration of license
+        self.expiry_date = [2016, 1, 20]    # IMPORTANT  - Expiration of license
         self.my_pc_win = [132098963232679]   # id of my PC-win
         self.my_pc_lin = [272774785408889]   # id of my PC-lin
         self.pc_license_list = None          # list with pc with valid licence
@@ -72,7 +72,8 @@ class LicenceCheck:
         if self.delta >= 0:
             self.licence_is_valid = True
 
-    def no_licence(self):
+    @staticmethod
+    def no_licence():
         """
         The window with message informing of lacking of licence for this PC.
         """
@@ -81,7 +82,8 @@ class LicenceCheck:
                                "W celu korzystania z programu skontaktuj się z Marcinem Pieczyńskim."
                                "\n\n marcin-pieczynski@wp.pl")
 
-    def licence_no_valid(self):
+    @staticmethod
+    def licence_no_valid():
         """
         The window with message informing that licence has expired.
         """

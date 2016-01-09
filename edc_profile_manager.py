@@ -199,19 +199,22 @@ class ProfileManager(SQliteEdit):
         self.final_profile.append(tuple(lista_cegiel))
         self.final_profile = tuple(self.final_profile)
 
-    def error_wrong_profile_name(self):
+    @staticmethod
+    def error_wrong_profile_name():
         """
         The window with message informing that the profile name is incorrect.
         """
         tkMessageBox.showerror("Błąd...", "Nazwa profilu nie może zawierać polskich liter ani spacji.")
 
-    def error_wrong_ceglas_names(self):
+    @staticmethod
+    def error_wrong_ceglas_names():
         """
         The window with message informing that the ceglas names are incorrect.
         """
         tkMessageBox.showerror("Błąd...", "Nie wprowadzono prawidłowo nazw dla cegieł.")
 
-    def error_no_drugs_names(self, name):
+    @staticmethod
+    def error_no_drugs_names(name):
         """
         The window with message informing that drugs names have not been introduced.
         """

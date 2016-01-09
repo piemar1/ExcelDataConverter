@@ -13,7 +13,7 @@ from edc_read_input import ReadInput
 from edc_write_output import WriteOutputPnVaUnitsPaternA, WriteOutputCeglyPaternA
 import edc_profile_manager
 
-from time import time
+# from time import time
 
 __author__ = 'Marcin Pieczyński'
 
@@ -85,10 +85,6 @@ class MainGui(LicenceCheck, SQliteEdit):
         self.top.maxsize(width=1000, height=400)
         self.top.resizable(width=True, height=False)
 
-        self.imputnumber = 0
-        self.PvNanumber = 0
-        self.UNITSnumber = 0
-        self.Ceglynumber = 0
         self.progress_step = 0
         self.filepath_input = Tkinter.StringVar()
         self.filepath_PnVa = Tkinter.StringVar()
@@ -132,7 +128,6 @@ class MainGui(LicenceCheck, SQliteEdit):
                                              filetypes=[("Excel file", ".xlsx")])
             self.filepath_input.set(os.path.realpath(f))
             self.excel_input_file = os.path.realpath(f)
-            self.imputnumber += 1
         except ValueError:
             tkMessageBox.showerror("Error", "Wystąpił problem z załadowaniem pliku excel z danymi.")
 
@@ -146,7 +141,6 @@ class MainGui(LicenceCheck, SQliteEdit):
                                                   filetypes=[("Excel file", ".xlsx")])
             self.filepath_PnVa.set((os.path.realpath(save)))
             self.PnVa_file = os.path.realpath(save)
-            self.PvNanumber += 1
         except ValueError:
             tkMessageBox.showerror("Error", " Wystąpił problem z plikiem do zapisu danych PnVa.")
 
@@ -160,7 +154,6 @@ class MainGui(LicenceCheck, SQliteEdit):
                                                   filetypes=[("Excel file", ".xlsx")])
             self.filepath_UNITS.set((os.path.realpath(save)))
             self.UNITS_file = os.path.realpath(save)
-            self.UNITSnumber += 1
         except ValueError:
             tkMessageBox.showerror("Error", " Wystąpił problem z plikiem do zapisu danych UNITS.")
 
@@ -172,21 +165,21 @@ class MainGui(LicenceCheck, SQliteEdit):
             save = tkFileDialog.asksaveasfilename(parent=self.top, initialdir="/home/marcin/pulpit/",
                                                   title="Wybór pliku do zapisu danych z Cegieł",
                                                   filetypes=[("Excel file", ".xlsx")])
-            # fc = open(save,"w")
             self.filepath_CEGLY.set((os.path.realpath(save)))
             self.CEGLY_file = os.path.realpath(save)
-            self.Ceglynumber += 1
         except ValueError:
             tkMessageBox.showerror("Error", " Wystąpił problem z plikiem do zapisu danych z Cegieł.")
 
-    def open_profile_menager(self):
+    @staticmethod
+    def open_profile_menager():
         """
         The methods launching profile manager.
         """
         reload(edc_profile_manager)
         edc_profile_manager.ProfileManager()
 
-    def error_no_profile(self):
+    @staticmethod
+    def error_no_profile():
         """
         The window with message informing that the profile has not been chosen..
         """
@@ -194,7 +187,8 @@ class MainGui(LicenceCheck, SQliteEdit):
                                "Należy dokonać wyboru profilu do filtrowania danych, "
                                "szczegóły poszczególnych profili można znaleść w Menadżeże Profili")
 
-    def error_no_files(self):
+    @staticmethod
+    def error_no_files():
         """
         The window with message informing that the files have not been chosen.
         """
@@ -202,7 +196,8 @@ class MainGui(LicenceCheck, SQliteEdit):
                                "Przed konwersją danych należy wybrać plik wejściowy zawierające dane Excel "
                                "oraz podać nazwy dla 3 plików wyjściowych w których program zapisze dane.")
 
-    def work_finished(self):
+    @staticmethod
+    def work_finished():
         """
         The window with message informing that excel data filtration was finished.
         """
@@ -216,132 +211,122 @@ class MainGui(LicenceCheck, SQliteEdit):
         if profil == "Wybierz profil":
             return self.error_no_profile()
 
-        elif self.imputnumber == 0 or self.PvNanumber == 0 or self.UNITSnumber == 0 or self.Ceglynumber == 0:
+        elif not self.excel_input_file or not self.PnVa_file or not self.UNITS_file or not self.CEGLY_file:
             return self.error_no_files()
 
-        elif self.imputnumber and self.PvNanumber and self.UNITSnumber and self.Ceglynumber \
+        elif self.excel_input_file and self.PnVa_file and self.UNITS_file and self.CEGLY_file \
                 and profil != "Wybierz profil":
 
             # Methods for carrying out reading, filtration and saving of excel data.
 
-            start = time()
+            # start = time()
             self.start_progress_bar()
-            print "1", time() - start
+            # print "1", time() - start
 
             # Reading of input data for excel file.
 
             excel_input_file = ReadInput(profil)
-            print "2", time() - start
+            # print "2", time() - start
 
             excel_input_file.open_input_file(self.excel_input_file)
             self.ad_step_to_progress_bar(5)
-            print "3", time() - start
+            # print "3", time() - start
             excel_input_file.get_date()
             self.ad_step_to_progress_bar(5)
-            print "4", time() - start
+            # print "4", time() - start
             excel_input_file.get_pnva_units_column()
             self.ad_step_to_progress_bar(5)
-            print "5", time() - start
+            # print "5", time() - start
             excel_input_file.get_cegla_positions()
             self.ad_step_to_progress_bar(5)
 
-            print "6", time() - start
+            # print "6", time() - start
             excel_input_file.get_cegly_data()
             self.ad_step_to_progress_bar(5)
 
-            print "7", time() - start
+            # print "7", time() - start
             excel_input_file.get_pnva_units_data()
             self.ad_step_to_progress_bar(5)
-            # print "Odczytanie danych z pliku input OK"
 
-            print "8", time() - start
+            # print "8", time() - start
             # Saving PnVa data into output file
-            print "9", time() - start
-            # print "START zapis danych PnVa do pliku output"
+            # print "9", time() - start
             output1 = WriteOutputPnVaUnitsPaternA(excel_input_file.output_zakladki,
                                                   excel_input_file.PnVa_data,
                                                   excel_input_file.output_lista_cegiel,
                                                   excel_input_file.output_leki)
-            print "10", time() - start
+            # print "10", time() - start
             self.ad_step_to_progress_bar(5)
-            print "11", time() - start
+            # print "11", time() - start
             output1.start_output()
             self.ad_step_to_progress_bar(5)
-            print "12", time() - start
+            # print "12", time() - start
             output1.write_base_data(excel_input_file.daty)
-            print "13", time() - start
+            # print "13", time() - start
             self.ad_step_to_progress_bar(5)
-            print "14", time() - start
+            # print "14", time() - start
             output1.write_pnva_units_data()
-            print "15", time() - start
+            # print "15", time() - start
             self.ad_step_to_progress_bar(5)
-            print "16", time() - start
+            # print "16", time() - start
             output1.save_output(self.PnVa_file)
-            print "17", time() - start
+            # print "17", time() - start
             self.ad_step_to_progress_bar(5)
-            print "18", time() - start
-
-            # print "Zapisywanie danych Zakończone OK"
+            # print "18", time() - start
 
             # Saving UNITS data into output file
-
-            # print "START zapis danych UNITS do pliku output"
 
             output2 = WriteOutputPnVaUnitsPaternA(excel_input_file.output_zakladki,
                                                   excel_input_file.UNITS_data,
                                                   excel_input_file.output_lista_cegiel,
                                                   excel_input_file.output_leki,)
-            print "19", time() - start
+            # print "19", time() - start
             self.ad_step_to_progress_bar(5)
-            print "20", time() - start
+            # print "20", time() - start
             output2.start_output()
             self.ad_step_to_progress_bar(5)
-            print "21", time() - start
+            # print "21", time() - start
             output2.write_base_data(excel_input_file.daty)
-            print "22", time() - start
+            # print "22", time() - start
             self.ad_step_to_progress_bar(5)
-            print "23", time() - start
+            # print "23", time() - start
             output2.write_pnva_units_data()
-            print "24", time() - start
+            # print "24", time() - start
             self.ad_step_to_progress_bar(5)
-            print "25", time() - start
+            # print "25", time() - start
             output2.save_output(self.UNITS_file)
-            print "26", time() - start
+            # print "26", time() - start
             self.ad_step_to_progress_bar(5)
-            print "27", time() - start
-
-            # print "Zapisywanie danych Zakończone OK"
+            # print "27", time() - start
 
             # Saving CEGLY data into output file
 
-            # print "START zapis danych CEGLY do pliku output"
-
             output3 = WriteOutputCeglyPaternA()
-            print "28", time() - start
+            # print "28", time() - start
             self.ad_step_to_progress_bar(5)
-            print "29", time() - start
+            # print "29", time() - start
             output3.start_output(excel_input_file.output_lista_cegiel)
-            print "30", time() - start
+            # print "30", time() - start
             self.ad_step_to_progress_bar(5)
-            print "31", time() - start
+            # print "31", time() - start
             output3.write_base_data(excel_input_file.output_lista_cegiel,
                                     excel_input_file.output_leki_cegly,
                                     excel_input_file.daty)
-            print "32", time() - start
+            # print "32", time() - start
             self.ad_step_to_progress_bar(5)
-            print "33", time() - start
+            # print "33", time() - start
             output3.write_pnva_units_data(excel_input_file.output_lista_cegiel,
                                           excel_input_file. output_leki_cegly,
                                           excel_input_file.CEGLY_data)
-            print "34", time() - start
+            # print "34", time() - start
             self.ad_step_to_progress_bar(5)
-            print "35", time() - start
+            # print "35", time() - start
             output3.save_output(self.CEGLY_file)
-            print "36", time() - start
+            # print "36", time() - start
             self.ad_step_to_progress_bar(5)
-            print "37", time() - start
+            # print "37", time() - start
 
-            print "Zapisywanie danych Zakończone OK"
+            # print "Zapisywanie danych Zakończone OK"
 
             return self.work_finished()
 
